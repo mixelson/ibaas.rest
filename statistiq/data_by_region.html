@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Stacked Bar Chart with Groups</title>
+    <script src="da_files/Chart.bundle.js"></script>
+    <script src="da_files/jquery.min.js"></script>
+    <style type="text/css">/* Chart.js */ @-webkit-keyframes chartjs-render-animation{from{opacity:0.99}to{opacity:1}}@keyframes chartjs-render-animation{from{opacity:0.99}to{opacity:1}}.chartjs-render-monitor{-webkit-animation:chartjs-render-animation 0.001s;animation:chartjs-render-animation 0.001s;}</style>
+    <script src="da_files/utils.js"></script>
+    <style>
+        canvas {
+            -moz-user-select: none;
+            -webkit-user-select: none;
+            -ms-user-select: none;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div style="width: 75%">
+        <div class="chartjs-size-monitor" style="position: absolute; left: 0px; top: 0px; right: 0px; bottom: 0px; overflow: hidden; pointer-events: none; visibility: hidden; z-index: -1;">
+            <div class="chartjs-size-monitor-expand" style="position:absolute;left:0;top:0;right:0;bottom:0;overflow:hidden;pointer-events:none;visibility:hidden;z-index:-1;">
+                <div style="position:absolute;width:1000000px;height:1000000px;left:0;top:0"></div>
+            </div>
+            <div class="chartjs-size-monitor-shrink" style="position:absolute;left:0;top:0;right:0;bottom:0;overflow:hidden;pointer-events:none;visibility:hidden;z-index:-1;">
+                <div style="position:absolute;width:200%;height:200%;left:0; top:0"></div>
+            </div>
+        </div>
+        <canvas id="canvas" width="1428" height="714" class="chartjs-render-monitor" style="display: block; height: 714px; width: 1428px;"></canvas>
+    </div>
+    
+    <button id="randomizeData">Randomize Data</button>
+
+    <script>
+        //<!-- data request start -->
+        select_formula_out="select region_id, toDayOfMonth(start_time), sum(ceil(duration/60)) as billed_minutes from default.merged_data where duration >= 3 and rec_type = 1 and (start_time >= '2018-01-22 00:00:00' and start_time < '2018-01-29 00:00:00') GROUP BY toDayOfMonth(start_time), region_id ORDER BY toDayOfMonth(start_time), region_id FORMAT JSON";
+
+        console.log('select_formula_out: ', select_formula_out);
+
+        select_formula_in="select region_id, toDayOfMonth(start_time), sum(ceil(duration/60)) as billed_minutes from default.merged_data where duration >= 3 and rec_type = 2 and (start_time >= '2018-01-22 00:00:00' and start_time < '2018-01-29 00:00:00') GROUP BY toDayOfMonth(start_time), region_id ORDER BY toDayOfMonth(start_time), region_id FORMAT JSON";
+
+        console.log('select_formula_in: ', select_formula_in);
+
+        $.ajax({
+          url: 'http://10.236.26.187:8123/?add_http_cors_header=1&log_queries=1&database=default&max_result_rows=500&result_overflow_mode=throw',
+          type: 'post', 
+          dataType: 'json', 
+          data: select_formula_out,            
+          success: function outData (outRawData) {
+            $.ajax({
+              url: 'http://10.236.26.187:8123/?add_http_cors_header=1&log_queries=1&database=default&max_result_rows=500&result_overflow_mode=throw',
+              type: 'post', 
+              dataType: 'json', 
+              data: select_formula_in,            
+              success: function inData (inRawData){
+                render(outRawData, inRawData)
+              }
+            });
+          }
+           
+        });
+        //<!-- data request end -->
+
+        function render(outRawData, inRawData){
+            console.log('outRawData',outRawData);
+            console.log('inRawData',inRawData);
+            //summ = outRawData.data[0].billed_minutes;
+            //console.log('summ',summ);
+
+            var out_mins_by_regions = [];
+
+            for (var j = 0; j <= 9; j++) {
+                var out_mins_by_region = [];
+                var region_ids = [];
+                for (var i = 0; i < outRawData.data.length; i++) {
+                    if (outRawData.data[i].region_id == j) {
+                    out_mins_by_region.push(outRawData.data[i].billed_minutes);
+                    region_ids.push(outRawData.data[i].region_id);
+                    }
+                }
+                out_mins_by_regions.push(out_mins_by_region)
+                console.log('out_mins_by_region',out_mins_by_region);
+                console.log('region_ids',region_ids);
+            };
+            
+            console.log('out_mins_by_regions',out_mins_by_regions);
+
+            var out_mins_all = [];
+            for (var i = 0; i < out_mins_by_regions[0].length; i++) {
+                //out_mins_all.push(i);
+                temp_sum = 0;
+                for (var j = 0; j <= 9; j++) {
+                    //out_mins_all.push(out_mins_by_regions[j][i]);
+                    temp_sum += out_mins_by_regions[j][i] << 0;
+                };
+                out_mins_all.push(temp_sum);
+            };
+
+            console.log('out_mins_all',out_mins_all);
+
+            var in_mins_by_regions = [];
+
+            for (var j = 0; j <= 9; j++) {
+                var in_mins_by_region = [];
+                var region_ids = [];
+                for (var i = 0; i < inRawData.data.length; i++) {
+                    if (inRawData.data[i].region_id == j) {
+                        in_mins_by_region.push(inRawData.data[i].billed_minutes);
+                        region_ids.push(inRawData.data[i].region_id);
+                    }
+                }
+                in_mins_by_regions.push(in_mins_by_region)
+                console.log('in_mins_by_region',in_mins_by_region);
+                console.log('region_ids',region_ids);
+            };
+            
+            console.log('in_mins_by_regions',in_mins_by_regions);
+
+            var in_mins_all = [];
+            for (var i = 0; i < in_mins_by_regions[0].length; i++) {
+                //in_mins_all.push(i);
+                temp_sum = 0;
+                for (var j = 0; j <= 9; j++) {
+                    //in_mins_all.push(in_mins_by_regions[j][i]);
+                    temp_sum += in_mins_by_regions[j][i] << 0;
+                };
+                in_mins_all.push(temp_sum);
+            };
+
+            console.log('in_mins_all',in_mins_all);
+
+            var barChartData = {
+                labels: ["22", "23", "24", "25", "26", "27", "28"],
+                datasets: [{
+                    label: 'ALL / out',
+                    backgroundColor: '#868e95',
+                    stack: 'All Out',
+                    data: out_mins_all
+                },{
+                    label: 'Region 0 / out',
+                    backgroundColor: window.chartColors.grey,
+                    stack: 'Out',
+                    data: out_mins_by_regions[0],
+                    hidden: true
+                }, {
+                    label: 'СЗФ / out',
+                    backgroundColor: '#ff74d4',
+                    stack: 'Out',
+                    data: out_mins_by_regions[1],
+                    hidden: true
+                }, {
+                    label: 'Урал / out',
+                    backgroundColor: '#7ff76d',
+                    stack: 'Out',
+                    data: out_mins_by_regions[2],
+                    hidden: true
+                }, {
+                    label: 'Сибирь / out',
+                    backgroundColor: window.chartColors.green,
+                    stack: 'Out',
+                    data: out_mins_by_regions[3],
+                    hidden: true
+                }, {
+                    label: 'Дальневосточный / out',
+                    backgroundColor: window.chartColors.blue,
+                    stack: 'Out',
+                    data: out_mins_by_regions[4],
+                    hidden: true
+                }, {
+                    label: 'Центральный / out',
+                    backgroundColor: window.chartColors.purple,
+                    stack: 'Out',
+                    data: out_mins_by_regions[5],
+                    hidden: true
+                }, {
+                    label: 'Столичный / out',
+                    backgroundColor: window.chartColors.red,
+                    stack: 'Out',
+                    data: out_mins_by_regions[6],
+                    hidden: true
+                }, {
+                    label: 'Поволжский / out',
+                    backgroundColor: window.chartColors.orange,
+                    stack: 'Out',
+                    data: out_mins_by_regions[7],
+                    hidden: true
+                }, {
+                    label: 'Кавказский / out',
+                    backgroundColor: window.chartColors.yellow,
+                    stack: 'Out',
+                    data: out_mins_by_regions[8],
+                    hidden: true
+                }, {
+                    label: 'Region Undef (9) / out',
+                    backgroundColor: window.chartColors.grey,
+                    stack: 'Out',
+                    data: out_mins_by_regions[9],
+                    hidden: true
+                }, {
+                    label: 'ALL / in',
+                    backgroundColor: '#337bff',
+                    stack: 'All In',
+                    data: in_mins_all
+                }, {
+                    label: 'Region 0 / in',
+                    backgroundColor: window.chartColors.grey,
+                    stack: 'In',
+                    data: in_mins_by_regions[0],
+                    hidden: true
+                }, {
+                    label: 'СЗФ / in',
+                    backgroundColor: '#ff74d4',
+                    stack: 'In',
+                    data: in_mins_by_regions[1],
+                    hidden: true
+                }, {
+                    label: 'Урал / in',
+                    backgroundColor: '#7ff76d',
+                    stack: 'In',
+                    data: in_mins_by_regions[2],
+                    hidden: true
+                }, {
+                    label: 'Сибирь / in',
+                    backgroundColor: window.chartColors.green,
+                    stack: 'In',
+                    data: in_mins_by_regions[3],
+                    hidden: true
+                }, {
+                    label: 'Дальневосточный / in',
+                    backgroundColor: window.chartColors.blue,
+                    stack: 'In',
+                    data: in_mins_by_regions[4],
+                    hidden: true
+                }, {
+                    label: 'Центральный / in',
+                    backgroundColor: window.chartColors.purple,
+                    stack: 'In',
+                    data: in_mins_by_regions[5],
+                    hidden: true
+                }, {
+                    label: 'Столичный / in',
+                    backgroundColor: window.chartColors.red,
+                    stack: 'In',
+                    data: in_mins_by_regions[6],
+                    hidden: true
+                }, {
+                    label: 'Поволжский / in',
+                    backgroundColor: window.chartColors.orange,
+                    stack: 'In',
+                    data: in_mins_by_regions[7],
+                    hidden: true
+                }, {
+                    label: 'Кавказский / in',
+                    backgroundColor: window.chartColors.yellow,
+                    stack: 'In',
+                    data: in_mins_by_regions[8],
+                    hidden: true
+                }, {
+                    label: 'Region Undef (9) / in',
+                    backgroundColor: window.chartColors.grey,
+                    stack: 'In',
+                    data: in_mins_by_regions[9],
+                    hidden: true
+                }]
+
+            };
+
+            var ctx = document.getElementById("canvas").getContext("2d");
+
+            window.myBar = new Chart(ctx, {
+                type: 'bar',
+                data: barChartData,
+                options: {
+                    legend:{
+                        display: true,
+                        position: 'right',
+                        labels: {
+                            fontColor: '#666',
+                            fontSize: 18
+                        }
+                    },
+                    title:{
+                        display:true,
+                        text:"Исходящие и входящие полные платные минуты по регионам"
+                    },
+                    tooltips: {
+                        mode: 'index',
+                        intersect: false
+                    },
+                    responsive: true,
+                    scales: {
+                        xAxes: [{
+                            stacked: true,
+                        }],
+                        yAxes: [{
+                            stacked: true
+                        }]
+                    }
+                }
+            });
+        };
+
+        document.getElementById('randomizeData').addEventListener('click', function() {
+            barChartData.datasets.forEach(function(dataset, i) {
+                dataset.data = dataset.data.map(function() {
+                    return randomScalingFactor();
+                });
+            });
+            window.myBar.update();
+        });
+
+    </script>
+
+</body>
+</html>

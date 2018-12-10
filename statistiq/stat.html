@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<!-- saved from url=(0052)http://getbootstrap.com/docs/4.0/examples/dashboard/ -->
+<html lang="ru"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta name="description" content="">
+  <meta name="author" content="">
+
+  <title>Статистика МультиФон МегаЛабс</title>
+
+  <!-- Bootstrap core CSS -->
+  <link href="da_files/bootstrap.min.css" rel="stylesheet">
+  <link href="da_files/daterangepicker/daterangepicker.css" rel="stylesheet">
+
+
+  <!-- Custom styles for this template -->
+  <link href="da_files/dashboard.css" rel="stylesheet">
+  <style type="text/css">
+    #chartc {
+      position: relative;
+    }
+    #switcher {
+      position: absolute;
+      top: 210px;
+      right: 5%;
+      z-index: 30;
+      /*font-size: 2.0em;*/
+    }
+    #summa {
+      /*position: relative;*/
+      /*top: 27%;*/
+      /*left: 10%;*/
+      /*top: 1%;
+      left: 57%;*/
+      /*z-index: 30;*/
+      color: #868e96;
+      font-size: 1.4em;
+      background: white;
+      /*padding-left: 20px;*/
+      /*height: 200px;*/
+
+      /*text-shadow: -1px 0 white, 0 1px white, 1px 0 white, 0 -1px white;*/
+    }
+
+    .daterangepicker td.active, .daterangepicker td.active:hover {
+      background-color: #057aff;
+    }
+
+    #summa p { font-size: x-small; }
+
+    .mini-charts .caption {
+      /*padding: 20px 0 5px;*/
+      font-weight: bold;
+    }
+    #totals1, #totals2, #totals {
+      min-width: 200px;
+      padding: 10px;
+      font-size: x-small;
+      vertical-align: top;
+    }
+    #totals1 h3, #totals2 h3, #totals h3 {
+      font-size: x-small;
+      margin-bottom: 0px;
+    }
+    .headline {
+      line-height: 1em;
+    }
+    #regionspread, #regionspread_in, #table_out_all, #table_in_all {
+      width: 100%;
+      font-family: "PT Serif Caption";
+    }
+    #regionspread  thead tr th, #regionspread_in  thead tr th, #table_out_all thead tr th, #table_in_all thead tr th {
+      background-color: #057aff;
+      color: white;
+      font-size: 0.7em;
+      padding-top: 5px;
+      padding-bottom: 5px;
+      padding-left: 10px;
+      padding-right: 10px;
+      cursor: pointer;
+    }
+    #regionspread  tbody tr td, #regionspread_in  tbody tr td {
+      font-size: 0.7em;
+      padding-top: 5px;
+      padding-bottom: 5px;
+      padding-left: 10px;
+      padding-right: 10px;
+    }
+    .leftpercent, .rightpercent {
+      text-align: right;
+    }
+    .leftpercent_line, .rightpercent_line {
+      min-width: 200px;
+    }
+    .leftsum, .rightsum {
+      min-width: 100px;
+    }
+    #regionspread tbody tr td.in_out_percents, #regionspread_in tbody tr td.in_out_percents {
+      /*.in_out_percents {*/
+      display: none;
+    }
+    #regionspread tbody tr td.in_out_ring,  #regionspread_in tbody tr td.in_out_ring {
+      /*.in_out_ring {*/
+      display: none;
+    }
+    #regionspread tbody tr td.summrightbar, #regionspread_in tbody tr td.summleftbar {
+      display: none;
+    }
+    #regionspread tbody tr td.rightpercent, #regionspread_in tbody tr td.leftpercent {
+      display: none;
+    }
+    #regionspread tbody tr td.rightpercent_line, #regionspread_in tbody tr td.leftpercent_line {
+      display: none;
+    }
+    #regionspread tbody tr td.rightsum, #regionspread_in tbody tr td.leftsum {
+      display: none;
+    }
+
+    .tablerow {
+      margin-bottom: 40px;
+    }
+    .regiontable tr td {
+      text-align: right;
+      font-family: "PT Serif Caption";
+    }
+
+    .stat-table th {
+      color: #FFF;
+    }
+  </style>
+  <link rel="stylesheet" href="da_files/font-awesome.css">
+
+
+</head>
+
+<body>
+<nav class="navbar navbar-expand-md navbar-dark fixed-top bg-dark">
+  <a class="navbar-brand col-md-2" href="#" style="text-align: center;">МультиФон</a>
+  <button class="navbar-toggler d-lg-none" type="button" data-toggle="collapse" data-target="#navbarsExampleDefault" aria-controls="navbarsExampleDefault" aria-expanded="false" aria-label="навигация">
+    <span class="navbar-toggler-icon"></span>
+  </button>
+
+  <div class="collapse navbar-collapse " id="navbarsExampleDefault" >
+    <ul class="navbar-nav mr-auto js-top-menu">
+      <li class="nav-item active">
+        <a class="nav-link"  id="ALL" href="#">ВСЕ НАПРАВЛЕНИЯ</a>
+      </li>
+
+      <li class="nav-item">
+        <a class="nav-link" id="MGF" href="#" >МЕГАФОН</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" id="NOTMGF" href="#" >не МЕГАФОН</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" id="ABC" href="#" >ABC РОССИЯ</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link"  id="INTER" href="#" >МЕЖДУНАРОДНЫЕ</a>
+      </li>
+    </ul>
+    <a class="nav-link" href="#">STATISTIQ</a>
+  </div>
+</nav>
+
+<div class="container-fluid">
+  <div class="row">
+    <nav class="col-sm-3 col-md-2 d-none d-sm-block bg-light sidebar">
+      <ul class="nav nav-pills flex-column js-set-select" style="padding-top: 20px;">
+        <li style="text-align: center;">
+          <label class="custom-control custom-radio">
+            <input id="ini" name="radio" type="radio" class="custom-control-input" onclick="magico(this.id);">
+            <span class="custom-control-indicator"></span>
+            <span class="custom-control-description">НАБОР1</span>
+          </label>
+          <label class="custom-control custom-radio">
+            <input id="inn" name="radio" type="radio" class="custom-control-input" onclick="magico(this.id);">
+            <span class="custom-control-indicator"></span>
+            <span class="custom-control-description">НАБОР2</span>
+          </label>
+        </li>
+        <li class="nav-item" style="display: none;"> <!-- overview dashboard, not implemented, so hidden in nav -->
+          <a class="nav-link" href="#" id="over" onclick="traffic(this.id);">Обзор</a>
+        </li>
+      </ul>
+      <ul class="nav nav-pills flex-column">
+        <li class="nav-item">
+          <a class="nav-link active" href="#" id="whole" onclick="traffic(this.id);">Весь трафик</a>
+        </li>
+      </ul>
+
+      <ul class="nav nav-pills flex-column">
+        <li class="nav-item">
+          <a class="nav-link" href="#" id="b2c" onclick="traffic(this.id);">B2C</a>
+        </li>
+        <li class="nav-item"> <!-- display nothing always, so hidden -->
+          <a class="nav-link" href="#" id="b2b" onclick="traffic(this.id);">B2B</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="#" id="trunk" onclick="traffic(this.id);">Trunk</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="#" id="stmb" onclick="traffic(this.id);">STMB</a>
+        </li>
+      </ul>
+
+      <ul class="nav nav-pills flex-column">
+        <li class="nav-item">
+          <a class="nav-link" href="#" id="emotion" onclick="traffic(this.id);">eMotion</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="#" id="emotion_ios" onclick="traffic(this.id);">eMotion iOS</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="#" id="emotion_android" onclick="traffic(this.id);">eMotion Android</a>
+        </li>
+        <!-- ## надо разбить на тарификацию
+                    <li class="nav-item">
+                      <a class="nav-link" href="#" id="emotion_not" onclick="traffic(this.id);">Не eMotion</a>
+                    </li> -->
+      </ul>
+    </nav>
+
+    <main class="col-sm-9 ml-sm-auto col-md-10 pt-3" role="main">
+      <h1 onclick="$('#info').toggle(); $('#header').toggle();">Статистика <a style="font-size: 0.5em;"><i class="fa fa-info-circle" aria-hidden="true"></i></a></h1>
+
+      <div style="margin-bottom: 109px;margin-top: -13px;min-height: 80px;">
+        <div id="info" style="display: none;">Оплаченные минуты
+          <span style="font-size: 0.5em;">(вызовы длительностью более и равные 3-м секундам)</span> </br>
+          <div style="color: #818182;">
+            <span style="font-size: 0.75em;">Критерий выборки направления трафика: </span>
+            <span id="direction_legend" style="font-size: 0.75em;"></span></br>
+            <span style="font-size: 0.75em;">Характер трафика: </span>
+            <span id="traffictype_legend" style="font-size: 0.75em;"></span></br>
+            <span id="legend" style="font-size: 0.5em;display: none;"></span> <!-- было нужно для отладки -->
+          </div>
+        </div>
+        <div id="header">
+          <a href="#" onclick="#" data-toggle="modal" data-target="#modal" style="text-decoration: none;">
+            <table>
+              <tr>
+                <td id="totals1"><i class="fa fa-cog fa-spin fa-2x text-muted"></i></td>
+                <td id="totals2"><i class="fa fa-cog fa-spin fa-2x text-muted"></i></td>
+                <td id="totals"><i class="fa fa-cog fa-spin fa-2x text-muted"></i></td>
+              </tr>
+            </table>
+          </a>
+        </div>
+      </div>
+
+      <div style="text-align: right;margin-top: -245px;margin-bottom: 35px; min-height: 50px;" >
+        <span id="timetime" style="color:grey;text-decoration:underline;font-size: 0.8em;"></span></br>
+        <div id="timeblock">
+          <a onclick=browse(this.id); href="#" id="day" class="badge badge-secondary">День</a>
+          <a onclick=browse(this.id); href="#" id="week" class="badge badge-primary">Неделя</a>
+          <a onclick=browse(this.id); href="#" id="month" class="badge badge-secondary">Месяц</a>
+          <a onclick=browse(this.id); href="#" id="year" class="badge badge-secondary">Год</a>
+        </div>
+      </div>
+
+
+      <div id="switcher">
+        <a href="#" onclick="#" data-toggle="modal" data-target="#modal" id="spock"><i class="fa fa-hand-spock-o" aria-hidden="true"></i></a></br>
+        <a href="#" onclick="switchtype('bar');"><i class="fa fa-bar-chart" aria-hidden="true"></i></a></br>
+        <a href="#" onclick="switchtype('line');"><i class="fa fa-line-chart" aria-hidden="true"></i></a></br>
+        <a href="#" onclick="switchtype('bubble');"><i class="fa fa-circle" aria-hidden="true"></i></a></br>
+        <a href="#" onclick="piechart();"><i class="fa fa-pie-chart" aria-hidden="true"></i></a></br>
+        <a href="#" onclick="tableit();"><i class="fa fa-table" aria-hidden="true"></i></a></br>
+        <a href="#" onclick="exportTableToCSV('table.csv');" id="downloadbutton" style="display: none;"><i class="fa fa-download" aria-hidden="true"></i></a>
+      </div>
+
+      <span id="totalminutes" style="display: none;">0</span>
+
+
+      <section class="row text-center placeholders">
+        <!-- <div class="col-9 placeholder" id="iframe" style="margin-top: 55px;" > -->
+        <div class="col-12 col-sm-12 placeholder" id="iframe" style="margin-top: 55px;" >
+          <div class="chart-container" id="chartc" style="position: relative; width:80vw">
+            <canvas class="chart1" id="chart1" ></canvas>
+            <progress id="animationProgress" max="1" value="0" style="width: 80%; display: none;"></progress>
+          </div>
+        </div>
+        <!-- <div class="col-9 placeholder" id="tframe" style="display: none; padding-top: 10%;text-align: right;padding-right: 5%;"> -->
+        <div class="col-12 col-sm-12 placeholder" id="tframe" style="display: none; padding-top: 10%;text-align: right;padding-right: 5%;">
+          <div class="table-responsive" id="chartd" style="position: relative;  width:80vw; padding-right: 10%;">
+          </div>
+        </div>
+
+        <!-- <div class="col-9 placeholder" id="pframe" style="display: none; margin-top: 65px;" > -->
+        <div class="col-12 col-sm-12 placeholder" id="pframe" style="display: none; margin-top: 65px;" >
+          <div class="chart-container" id="chartp" style="position: relative;  width:80vw">
+            <canvas class="chart2" id="chart2" ></canvas>
+          </div>
+        </div>
+
+      </section>
+
+
+      <!-- <div class="col-6 col-md-3 sidebar-offcanvas" > -->
+      <div class="row tablerow js-regionspread-container">
+        <div class="col-sm placeholder" >
+          <h3>Исходящих</h3>
+          <table id="regionspread">
+            <thead>
+            <tr>
+              <th>Регион</th>
+              <th style="text-align: right;">Минут</th>
+              <th style="text-align: right;">%</th>
+              <th>Доля</th>
+              <th colspan="3" style="display: none;">Входящих</th>
+              <th colspan="2" style="display: none;">Соотношение,&nbsp;%</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr style="display: none;">
+              <td></td>
+              <td></td>
+              <td></td>
+              <td></td>
+              <td style="display: none;"></td>
+              <td style="display: none;"></td>
+              <td style="display: none;"></td>
+              <td style="display: none;"></td>
+              <td style="display: none;"></td>
+            </tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="col-sm placeholder" >
+          <h3>Входящих</h3>
+          <table id="regionspread_in">
+            <thead>
+            <tr>
+              <th>Регион</th>
+              <th colspan="3" style="display: none;"></th>
+              <th style="text-align: right;">Минут</th>
+              <th style="text-align: right;">%</th>
+              <th>Доля</th>
+              <th colspan="2" style="display: none;">Соотношение,&nbsp;%</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr style="display: none;">
+              <td></td>
+              <td style="display: none;"></td>
+              <td style="display: none;"></td>
+              <td style="display: none;"></td>
+              <td></td>
+              <td></td>
+              <td></td>
+              <td style="display: none;"></td>
+              <td style="display: none;"></td>
+            </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <section class="js-mini-charts mini-charts row">
+      </section>
+
+      <section class="js-region-tables">
+      </section>
+
+
+      <!-- Modal -->
+      <div class="modal fade" id="modal" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title" id="exampleModalLongTitle">Суммарные показатели</h5>
+              <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+              </button>
+            </div>
+            <div class="modal-body">
+              <div id="summa">
+                MEGALABS
+              </div>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-dismiss="modal">Спрятать</button>
+              <!-- <button type="button" class="btn btn-primary">Save changes</button> -->
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- Modal End -->
+
+    </main>
+  </div>
+</div>
+
+<!-- Bootstrap core JavaScript
+================================================== -->
+<!-- Placed at the end of the document so the pages load faster -->
+<!-- <script src="da_files/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script> -->
+<!-- <script>window.jQuery || document.write('<script src="../../../../assets/js/vendor/jquery.min.js"><\/script>')</script> -->
+<script src="da_files/jquery.min.js"></script>
+<script src="da_files/jquery-dateFormat.min.js"></script>
+
+<script src="da_files/popper.min.js"></script>
+<script src="da_files/bootstrap.min.js"></script>
+<!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
+<script src="da_files/ie10-viewport-bug-workaround.js"></script>
+
+<script src="da_files/Chart.bundle.js"></script>
+
+<script src="da_files/daterangepicker/moment.min.js"></script>
+<script src="da_files/lodash.min.js"></script>
+<script src="da_files/daterangepicker/ru.js"></script>
+<script src="da_files/daterangepicker/daterangepicker.js"></script>
+
+<!-- http://benpickles.github.io/peity/ -->
+<script src="da_files/jquery.peity.min.js"></script>
+
+<script src="da_files/app.js"></script>
+
+
+<style type="text/css">
+  .widget-label { display: none; }
+  .js-widget-label { display: none; }
+</style>
+
+</body></html>
