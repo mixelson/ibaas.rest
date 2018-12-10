@@ -1,0 +1,1160 @@
+<!DOCTYPE html>
+<!-- saved from url=(0052)http://getbootstrap.com/docs/4.0/examples/dashboard/ -->
+<html lang="ru"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="">
+    <meta name="author" content="">
+
+    <title>VoIP Network StatisIQ</title>
+
+    <!-- Bootstrap core CSS -->
+    <link href="da_files/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Custom styles for this template -->
+    <link href="da_files/dashboard.css" rel="stylesheet">
+                <style type="text/css">
+                #chartc {
+                  position: relative;
+                }
+                #switcher {
+                  position: absolute;
+                  top: 40%;
+                  right: 5%;
+                  z-index: 30;
+                  /*font-size: 2.0em;*/
+                }
+                #summa {
+                  color: #868e96;
+                  font-size: 1.4em;
+                  background: white;
+                }             
+                #summa p { font-size: x-small; }        
+            </style>
+            <link rel="stylesheet" href="da_files/font-awesome.css">
+  </head>
+
+  <body>
+    <nav class="navbar navbar-expand-md navbar-dark fixed-top bg-dark">
+      <a class="navbar-brand col-md-2" href="#" style="text-align: center;">MyVoIPNet</a>
+      <button class="navbar-toggler d-lg-none" type="button" data-toggle="collapse" data-target="#navbarsExampleDefault" aria-controls="navbarsExampleDefault" aria-expanded="false" aria-label="navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+
+      <div class="collapse navbar-collapse " id="navbarsExampleDefault" >
+        <ul class="navbar-nav mr-auto">
+          <li class="nav-item active" id="ALL" onclick="direct(this.id);">
+            <a class="nav-link" href="#">ALL DIRECTIONS</a>
+          </li>
+<!--           <li class="nav-item" id="INTRA" onclick="direct(this.id);">
+            <a class="nav-link" href="#" >МУЛЬТИФОН</a>
+          </li>       -->    
+          <li class="nav-item" id="MGF" onclick="direct(this.id);">
+            <a class="nav-link" href="#" >INTRA-CONNECT</a>
+          </li>
+          <li class="nav-item" id="NOTMGF" onclick="direct(this.id);">
+            <a class="nav-link" href="#" >INTER-CONNECT</a>
+          </li>          
+          <li class="nav-item" id="ABC" onclick="direct(this.id);">
+            <a class="nav-link" href="#" >NATIONAL</a>
+          </li>
+          <li class="nav-item" id="INTER" onclick="direct(this.id);">
+            <a class="nav-link" href="#" >INTERNATIONAL</a>
+          </li>
+        </ul>
+        <a class="nav-link" href="#">STATISTIQ</a>
+      </div>
+    </nav>
+
+    <div class="container-fluid">
+      <div class="row">
+        <nav class="col-sm-3 col-md-2 d-none d-sm-block bg-light sidebar">
+          <ul class="nav nav-pills flex-column" style="padding-top: 20px;">
+            <lh style="text-align: center;">
+              <label class="custom-control custom-radio">
+                <input id="ini" name="radio" type="radio" class="custom-control-input" onclick="magico(this.id);">
+                <span class="custom-control-indicator"></span>
+                <span class="custom-control-description">DATASET1</span>
+              </label>
+              <label class="custom-control custom-radio">
+                <input id="inn" name="radio" type="radio" class="custom-control-input" onclick="magico(this.id);">
+                <span class="custom-control-indicator"></span>
+                <span class="custom-control-description">DATASET2</span>
+              </label>              
+            </lh>
+            <li class="nav-item" style="display: none;"> <!-- overview dashboard, not implemented, so hidden in nav -->
+              <a class="nav-link" href="#" id="over" onclick="traffic(this.id);">Commnon</a>
+            </li>
+          </ul>
+          <ul class="nav nav-pills flex-column">
+            <li class="nav-item">
+              <a class="nav-link active" href="#" id="whole" onclick="traffic(this.id);">All types</a>
+            </li>
+          </ul>
+
+          <ul class="nav nav-pills flex-column">
+            <li class="nav-item">
+              <a class="nav-link" href="#" id="b2c" onclick="traffic(this.id);">B2C</a>
+            </li>
+            <li class="nav-item"> 
+              <a class="nav-link" href="#" id="b2b" onclick="traffic(this.id);">B2B</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="#" id="stmb" onclick="traffic(this.id);">Trunk</a>
+            </li>
+          </ul>
+
+          <ul class="nav nav-pills flex-column">
+            <li class="nav-item">
+              <a class="nav-link" href="#" id="emotion" onclick="traffic(this.id);">Mobile</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="#" id="emotion_ios" onclick="traffic(this.id);">Mobile iOS</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="#" id="emotion_android" onclick="traffic(this.id);">Mobile Android</a>
+            </li>
+          </ul>
+        </nav>
+
+        <main class="col-sm-9 ml-sm-auto col-md-10 pt-3" role="main">
+          <h1 style="margin-bottom: 109px;">VoIP Intelligence</h1>
+          
+          <div style="margin-bottom: 109px;margin-top: -13px; display: none;">Оплаченные минуты 
+            <span style="font-size: 0.5em;">(вызовы длительностью более и равные 3-м секундам)</span> </br>
+            <div style="color: #818182;">
+              <span style="font-size: 0.75em;">Критерий выборки направления трафика: </span> 
+              <span id="direction_legend" style="font-size: 0.75em;"></span></br>
+              <span style="font-size: 0.75em;">Характер трафика: </span> 
+              <span id="traffictype_legend" style="font-size: 0.75em;"></span></br>            
+              <span id="legend" style="font-size: 0.5em;display: none;"></span> <!-- было нужно для отладки -->
+            </div>
+          </div>
+
+          <div style="text-align: right;margin-top: -165px;margin-bottom: 35px; min-height: 50px;" >
+            <span id="timetime" style="color:grey;text-decoration:underline;font-size: 0.8em;"></span></br>
+            <div id="timeblock"> 
+            <a onclick=browse(this.id); href="#" id="day" class="badge badge-secondary">Day</a>
+            <a onclick=browse(this.id); href="#" id="week" class="badge badge-primary">Week</a>
+            <a onclick=browse(this.id); href="#" id="month" class="badge badge-secondary">Month</a>
+            <a onclick=browse(this.id); href="#" id="year" class="badge badge-secondary">Year</a>
+            </div>
+          </div>          
+
+
+          <div id="switcher"> 
+              <a href="#" onclick="#" data-toggle="modal" data-target="#modal" id="spock"><i class="fa fa-hand-spock-o" aria-hidden="true"></i></a></br>
+              <a href="#" onclick="switchtype('bar');"><i class="fa fa-bar-chart" aria-hidden="true"></i></a></br>
+              <a href="#" onclick="switchtype('line');"><i class="fa fa-line-chart" aria-hidden="true"></i></a></br>
+              <a href="#" onclick="switchtype('bubble');"><i class="fa fa-circle" aria-hidden="true"></i></a></br>
+              <a href="#" onclick="piechart();"><i class="fa fa-pie-chart" aria-hidden="true"></i></a></br>
+              <a href="#" onclick="tableit();"><i class="fa fa-table" aria-hidden="true"></i></a></br>
+              <a href="#" onclick="exportTableToCSV('table.csv');" id="downloadbutton" style="display: none;"><i class="fa fa-download" aria-hidden="true"></i></a>
+          </div>
+
+          <span id="totalminutes" style="display: none;">0</span>
+
+
+          <section class="row text-center placeholders">
+            <div class="col-12 col-sm-12 placeholder" id="iframe" style="margin-top: 55px;" >
+              <div class="chart-container" id="chartc" style="position: relative; height:40vh; width:80vw">
+                  <canvas class="chart1" id="chart1" ></canvas>
+                  <progress id="animationProgress" max="1" value="0" style="width: 80%; display: none;"></progress>
+              </div>
+            </div>
+            <div class="col-12 col-sm-12 placeholder" id="tframe" style="display: none; padding-top: 10%;text-align: right;padding-right: 5%;">
+              <div class="table-responsive" id="chartd" style="position: relative; height:40vh; width:80vw; padding-right: 10%;">
+              </div>
+            </div>
+
+            <div class="col-12 col-sm-12 placeholder" id="pframe" style="display: none; margin-top: 65px;" >
+              <div class="chart-container" id="chartp" style="position: relative; height:40vh; width:80vw">
+                  <canvas class="chart2" id="chart2" ></canvas>
+              </div>
+            </div>
+
+          </section>      
+
+
+          <!-- Modal -->
+          <div class="modal fade" id="modal" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+              <div class="modal-content">
+                <div class="modal-header">
+                  <h5 class="modal-title" id="exampleModalLongTitle">Суммарные показатели</h5>
+                  <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                  </button>
+                </div>
+                <div class="modal-body">
+                  <div id="summa">
+                      MEGALABS
+                  </div>                  
+                </div>
+                <div class="modal-footer">
+                  <button type="button" class="btn btn-secondary" data-dismiss="modal">Спрятать</button>
+                  <!-- <button type="button" class="btn btn-primary">Save changes</button> -->
+                </div>
+              </div>
+            </div>
+          </div>
+          <!-- Modal End -->
+
+        </main>
+      </div>
+    </div>
+
+    <!-- Bootstrap core JavaScript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    <!-- <script src="da_files/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script> -->
+    <!-- <script>window.jQuery || document.write('<script src="../../../../assets/js/vendor/jquery.min.js"><\/script>')</script> -->
+    <script src="da_files/jquery.min.js"></script>
+    <script src="da_files/jquery-dateFormat.min.js"></script>
+
+    <script src="da_files/popper.min.js"></script>
+    <script src="da_files/bootstrap.min.js"></script>
+    <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
+    <script src="da_files/ie10-viewport-bug-workaround.js"></script>
+
+    <script src="da_files/Chart.bundle.js"></script>
+
+    <style type="text/css">
+      .widget-label { display: none; }
+      .js-widget-label { display: none; }
+    </style>
+
+    <script type="text/javascript">
+      $(function() {
+          // console.log( "ready!" );
+
+          date_point="week";
+          direct_point="ALL";
+          traffic_point="whole";
+          chart="";
+          gtype="bar";
+          magic_point="inn";
+          $('#inn').prop('checked', true);
+          color1 = "#868e95";
+          color2 = "#007bff";
+          aduration = 2000;
+
+          initsql();
+
+          browse(date_point);
+          var labels = [];
+          // We dont do below to avoid multi-load of a graph on page load
+          // // direct(direct_point);
+          // // traffic(traffic_point);
+      });
+    </script>
+
+    <script type="text/javascript">
+      function piechart() {
+        $('#iframe').hide("slow");
+        $('#summa').hide("slow");
+        $('#tframe').hide("slow");
+        $('#spock').hide("slow");
+        $('#downloadbutton').hide("slow");
+        $('#pframe').show("slow");
+
+        var xx = 0;
+        var yy = 0;
+        for ($i=0;$i<chart.data.datasets[0].data.length;$i++) {
+          var x = chart.data.datasets[0].data[$i].y; xx+=x;
+          var y = chart.data.datasets[1].data[$i].y; yy+=y;
+        }
+
+         console.log('PIE: '+xx+' '+yy);
+
+         var config = {
+              type: 'doughnut',
+              data: {
+                  datasets: [{
+                      data: [ xx, yy ],
+                      backgroundColor: [
+                          color1,
+                          color2
+                      ]
+                  }],
+                  labels: [
+                      chart.data.datasets[0].label,
+                      chart.data.datasets[1].label
+                  ]
+              },
+              options: {
+                  responsive: true,
+                  legend: {
+                      position: 'top',
+                  },
+                  animation: {
+                      animateScale: true,
+                      animateRotate: true
+                  }               
+              }
+          };        
+        
+        var ctx = $('.chart2').get(0).getContext("2d"); 
+        var piech = new Chart(ctx, config);
+
+      }
+      function tableit() {
+
+        $('#iframe').hide("slow");
+        $('#summa').hide("slow");
+        $('#tframe').show("slow");
+        $('#pframe').hide("slow");
+        $('#spock').hide("slow");
+        $('#downloadbutton').show("slow");
+
+
+        var xx = 0;
+        var yy = 0;
+        var st = 'style="text-align: right;"';
+
+        var tablestring = '<table class="table  table-hover" '+st+'>'; //table-inverse table-striped
+        tablestring += '<tr class="bg-primary" style="color:white;"><th>Period</th><th '+st+'>'+chart.data.datasets[0].label+'</th><th '+st+'>'+chart.data.datasets[1].label+'</th></tr>';
+        for ($i=0;$i<chart.data.datasets[0].data.length;$i++) {
+          var x = chart.data.datasets[0].data[$i].y; xx+=x;
+          var y = chart.data.datasets[1].data[$i].y; yy+=y;
+          tablestring += '<tr><th scope="row">'+labels[$i]+'</th><td style="color:'+color1+'">'+respace(x+' 00')+'</td><td style="color:'+color2+'">'+respace(y+' 00')+'</td></tr>';
+        }
+          tablestring += '<tr><th>Total</th><th '+st+'>'+respace(xx+' 00')+'</th><th '+st+'>'+respace(yy+' 00')+'</th></tr>';
+        tablestring += '</table>';
+        $('#chartd').html(tablestring);
+      }
+
+      function respace(i) {
+                i = i.toString();
+                // console.log(i);
+                i = i.replace(new RegExp("^(\\d{" + (i.length%3?i.length%3:0) + "})(\\d{3})", "g"), "$1 $2").replace(/(\d{3})+?/gi, "$1 ").trim();
+                // console.log(i);
+                i = i.replace(/00$/,'');
+                // console.log(i);
+                return i;
+      }
+
+      function initsql() {
+          select_formula=",sum(ceil(duration/60)) as minutes, ceil(sum(duration/60)) as minuu from default.merged_data where duration >= 3";
+          select_traffic="";
+          select_type="";
+          date_marker="";
+          date_interval="";
+      }
+
+      function browse(id) {
+        // alert(id);
+        $('#hour').removeClass('badge-secondary');
+        $('#day').removeClass('badge-secondary');
+        $('#week').removeClass('badge-secondary');
+        $('#month').removeClass('badge-secondary');
+        $('#year').removeClass('badge-secondary');
+        //
+        $('#hour').removeClass('badge-primary');
+        $('#day').removeClass('badge-primary');
+        $('#week').removeClass('badge-primary');
+        $('#month').removeClass('badge-primary');
+        $('#year').removeClass('badge-primary');
+        //
+        $('#hour').addClass('badge-secondary');
+        $('#day').addClass('badge-secondary');
+        $('#week').addClass('badge-secondary');
+        $('#month').addClass('badge-secondary');
+        $('#year').addClass('badge-secondary');
+        //
+        $('#'+id).removeClass('badge-secondary');        
+        $('#'+id).addClass('badge-primary');        
+
+        $('#timeblock').hide();
+        $('#switcher').hide();
+
+        date_point=id;
+        loadgraph();
+        // console.log('date_point:'+date_point+' direct_point:'+direct_point+' traffic_point:'+traffic_point);
+     
+      }
+
+      function direct(id) {
+        $('#ALL').removeClass('active');
+        $('#ABC').removeClass('active');
+        $('#MGF').removeClass('active');
+        $('#NOTMGF').removeClass('active');
+        $('#INTER').removeClass('active');
+        $('#INTRA').removeClass('active');
+        $('#'+id).addClass('active');
+        direct_point=id;
+        loadgraph();
+        // console.log('date_point:'+date_point+' direct_point:'+direct_point+' traffic_point:'+traffic_point);
+
+      }
+
+      function traffic(id) {
+        $('#over').removeClass('active');
+        $('#whole').removeClass('active');
+        $('#b2c').removeClass('active');
+        $('#b2b').removeClass('active');
+        $('#stmb').removeClass('active');
+        $('#emotion').removeClass('active');
+        $('#emotion_ios').removeClass('active');
+        $('#emotion_android').removeClass('active');
+        $('#emotion_not').removeClass('active');
+        $('#'+id).addClass('active');
+        traffic_point=id;
+        loadgraph();
+        // console.log('date_point:'+date_point+' direct_point:'+direct_point+' traffic_point:'+traffic_point);
+      }
+
+      function magico(id) {
+          magic_point = id;
+          console.log('magico:'+magic_point);
+          loadgraph();
+      }
+      function getRandomInt(max) {
+        return Math.floor(Math.random() * Math.floor(max));
+      }
+
+
+      function newlabels(period) {
+      	    
+      	    var num = 7;
+            var myLocalDate = new Date();
+
+      	    if (period == "day"  ) { num = 24; } 
+      	    if (period == "week" ) { num = 7;   myLocalDate.setDate(myLocalDate.getDate()-num); }
+      	    if (period == "month") { num = 31;  myLocalDate.setMonth(myLocalDate.getMonth()-1);  }
+      	    if (period == "year" ) { num = 12;  myLocalDate.setYear(parseInt(myLocalDate.getYear()) - 1 + parseInt(1900)); }
+      	    console.log('period: '+period+', num: '+num);
+      	    
+      	    labels = [];
+
+            for (var i = 0; i <= num-1; i++) {
+
+              	// console.log('NewLabel Index:'+i);
+
+              	if (period == "year") {
+              		labels[i] = ("0"+(myLocalDate.getMonth()+1)).slice(-2) + '/' + (parseInt(myLocalDate.getYear()) + parseInt(1900));
+	              	myLocalDate.setMonth(myLocalDate.getMonth()+1);
+                  if ( labels[i] == '01/2017' ) { labels[i] = '01/2018'; }                  // грязный хек
+            		// labels = ['Январь','Февраль','Март','Апрель','Май','Июнь','Июль','Август','Сентябрь','Октябрь','Ноябрь','Декабрь'];
+              	}
+              	if (period == "month") {
+              		labels[i] = ("0"+(myLocalDate.getDate())).slice(-2) + '/' + ("0"+(myLocalDate.getMonth()+1)).slice(-2) + '/' + (parseInt(myLocalDate.getYear()) + parseInt(1900));
+	              	myLocalDate.setDate(myLocalDate.getDate()+1);
+              	}
+              	if (period == "week") {
+                  labels[i] = ("0"+(myLocalDate.getDate())).slice(-2) + '/' + ("0"+(myLocalDate.getMonth()+1)).slice(-2) + '/' + (parseInt(myLocalDate.getYear()) + parseInt(1900));
+	              	// labels[i] = ("0"+(myLocalDate.getDate()+1)).slice(-2) + '/' + ("0"+(myLocalDate.getMonth()+1)).slice(-2) + '/' + (parseInt(myLocalDate.getYear()) + parseInt(1900));
+	              	myLocalDate.setDate(myLocalDate.getDate()+1);
+              	}
+              	if (period == "day") {
+	              	labels[i] = ("0" + i).slice(-2);
+	              	myLocalDate.setDate(myLocalDate.getDate()+1);
+              	}
+
+                // console.log(myLocalDate);
+              	// console.log('NewLabel Marker:'+labels[i]);
+            }
+      }
+
+      function loadgraph() {
+        // console.log('Ok, go with... date_point:'+date_point+' direct_point:'+direct_point+' traffic_point:'+traffic_point);
+
+        if (chart) { switchtype(gtype); }
+        
+        $('#legend').text(' '+date_point+' '+direct_point+' '+traffic_point+' ')
+        $('#summa').text('МегаЛабс');
+
+        initsql();      
+
+
+        // TRAFFIC DIRECTIONS MAGIC    
+
+        if ( magic_point == 'ini' ) { 
+          select_traffic =" and ";
+          select_traffic+="  ((rec_type = 37 AND type_1_ser = '11' AND code_1_ser = '01')"; // to check (sip2sip)
+          select_traffic+="    or ";
+          select_traffic+="   (rec_type = 1))";
+        }
+
+
+        if ( direct_point == 'ALL' ) {        
+          $('#direction_legend').text("Все направления - все набранные номера.");
+        }
+        if ( direct_point == 'ABC' ) {
+          select_traffic+=" and match(dialed, '^7') AND NOT match(dialed, '^77|^79')";
+          $('#direction_legend').text("ABC - Все набранные номера, начинающиеся с 7 и не начинающиеся с 77 и 79.");
+        }
+        if ( direct_point == 'MGF' ) {
+          select_traffic+=" and match(dialed, '^79[23]')";
+          $('#direction_legend').text("МегаФон - Все набранные номера, начинающиеся с 792 и 793.");
+        } 
+        if ( direct_point == 'NOTMGF' ) {
+          select_traffic+=" and match(dialed, '^79[01456789]')";
+          $('#direction_legend').text("не МегаФон - Все набранные номера, начинающиеся с 79 и далее одной из цифр 1 4 5 6 7 8 9.");
+        } 
+        if ( direct_point == 'INTER' ) {
+          select_traffic+=" and match(dialed, '^[12345689]|^77')";
+          $('#direction_legend').text("МЕЖДУНАРОДНЫЕ - Все набранные номера, начинающиеся с 77 или одной из цифр 1 2 3 4 5 6 8 9.");
+        }         
+        if ( direct_point == 'INTRA' ) {
+          select_traffic =" and rec_type = 37 AND type_1_ser = '11' AND code_1_ser = '01'"; // to check (sip2sip)
+          $('#direction_legend').text("Вызовы внутри МультиФон - sip-2-sip");
+        }
+        // TRAFFIC DIRECTIONS MAGIC -- ends here       
+
+        // TRAFFIC TYPE MAGIC
+        if ( traffic_point == 'over' ) {}
+        if ( traffic_point == 'whole' ) {
+          $('#traffictype_legend').text("Весь трафик.");
+        }
+        if ( traffic_point == 'b2c' ) {
+          select_type = " and business_type = 1";
+          $('#traffictype_legend').text("Присутсвует признак типа бизнеса \"единица\".");
+        }
+        if ( traffic_point == 'b2b' ) {
+          // select_type = " and trunk_id = '0' AND business_type IN (2, 3)";
+          // $('#traffictype_legend').text("Нулевоей идентификатор транка и признак типа бизнеса \"два\" или \"три\".");
+          select_type = " and (trunk_id = '' AND business_type = 2)";
+          $('#traffictype_legend').text("Нулевоей идентификатор транка и признак типа бизнеса \"два\".");
+        }
+        if ( traffic_point == 'stmb' ) {
+          select_type = " and ((trunk_id != '' AND business_type = 2) OR (stmb = 1))";
+          $('#traffictype_legend').text("Выполняется одно из условий - установлен флаг STMB или одноременно транк не ноль и тип бизнеса 2");
+        }
+        if ( traffic_point == 'emotion' ) {
+          select_type = " and match(useragent, 'eMotion')";
+          $('#traffictype_legend').text("Присутсвует описание софтфона eMotion");
+            // not_emotion: 'not match(useragent, \'eMotion\')',
+            // emotion_android: 'match(useragent, \'eMotion.*Android\')',
+            // emotion_ios: 'match(useragent, \'eMotion.*iP(hone|ad|od)\')',
+        }
+        if ( traffic_point == 'emotion_ios' ) {
+          select_type = " and match(useragent, 'eMotion.*iP(hone|ad|od)')";
+          $('#traffictype_legend').text("Присутсвует описание софтфона eMotion iOS");
+            // not_emotion: 'not match(useragent, \'eMotion\')',
+            // emotion_android: 'match(useragent, \'eMotion.*Android\')',
+            // emotion_ios: 'match(useragent, \'eMotion.*iP(hone|ad|od)\')',
+        }
+        if ( traffic_point == 'emotion_android' ) {
+          select_type = " and match(useragent, 'eMotion.*Android')";
+          $('#traffictype_legend').text("Присутсвует описание софтфона eMotion Android");
+            // not_emotion: 'not match(useragent, \'eMotion\')',
+            // emotion_android: 'match(useragent, \'eMotion.*Android\')',
+            // emotion_ios: 'match(useragent, \'eMotion.*iP(hone|ad|od)\')',
+        }
+        if ( traffic_point == 'emotion_not' ) {
+          select_type = " and not match(useragent, 'eMotion')";
+          $('#traffictype_legend').text("Не присутсвует описание софтфона eMotion");
+            // not_emotion: 'not match(useragent, \'eMotion\')',
+            // emotion_android: 'match(useragent, \'eMotion.*Android\')',
+            // emotion_ios: 'match(useragent, \'eMotion.*iP(hone|ad|od)\')',
+        }
+        // TRAFFIC TYPE MAGIC -- ends here
+
+       
+        // DATE MAGICS
+        var myDate = new Date();
+        var myString = $.format.date(myDate, "dd/MM/yyyy HH:mm");
+        var myStringHour = $.format.date(myDate, "HH:mm");
+        var myStringDate = $.format.date(myDate, "dd/MM/yyyy");
+        var myStringInterval = $.format.date(myDate, "yyyy-MM-dd HH:mm:00");
+        labels = [];
+
+
+
+        if ( date_point == "day") {
+            myDate.setDate(myDate.getDate() - 0);
+            myStringDate = $.format.date(myDate, "dd/MM/yyyy");
+            myStringInterval = $.format.date(myDate, "yyyy-MM-dd 00:00:00");
+            myDate.setDate(myDate.getDate() - 1);
+            myString = $.format.date(myDate, "dd/MM/yyyy") + " (00:00) - " + myStringDate + " (00:00)";
+            date_marker = "toHour(start_time)";
+            aduration = 1000;
+            newlabels(date_point);
+
+        }        
+        if ( date_point == "week") {
+            myDate.setDate(myDate.getDate() - 0);
+            myStringDate = $.format.date(myDate, "dd/MM/yyyy");
+            myStringInterval = $.format.date(myDate, "yyyy-MM-dd 00:00:00");
+            myDate.setDate(myDate.getDate() - 7);
+            myString = $.format.date(myDate, "dd/MM/yyyy") + " (00:00) - " + myStringDate + " (00:00)";
+            // date_marker = "toDayOfWeek(start_time)"; // number of weekdays
+            date_marker = "toDayOfMonth(start_time)"; // date of month
+            newlabels(date_point);
+
+            aduration = 2000;
+        }      
+        if ( date_point == "month") {
+            myDate.setDate(myDate.getDate() - 0);
+            myStringDate = $.format.date(myDate, "dd/MM/yyyy");
+            myStringInterval = $.format.date(myDate, "yyyy-MM-dd 00:00:00");
+            myDate.setMonth(myDate.getMonth() - 1);
+            myString = $.format.date(myDate, "dd/MM/yyyy") + " (00:00) - " + myStringDate + " (00:00)";
+            date_marker = "toDayOfMonth(start_time)";
+            aduration = 4000;
+            newlabels(date_point);        
+        }      
+        if ( date_point == "year") {
+            myDate.setDate(myDate.getDate() - 1); // does not include yesterday
+            myDate.setDate(myDate.getDate() - 0); // includes yesterday
+            myStringDate = $.format.date(myDate, "dd/MM/yyyy");
+            myStringInterval = $.format.date(myDate, "yyyy-MM-dd 00:00:00");
+            myDate.setYear(parseInt(myDate.getYear()) - 1 + parseInt(1900));
+            myString = $.format.date(myDate, "dd/MM/yyyy") + " (00:00) - " + myStringDate + " (00:00)";
+            date_marker = "toMonth(start_time)";
+            aduration = 8000;
+            newlabels(date_point);                    
+        }   
+        date_interval = " and (start_time > '" + $.format.date(myDate, "yyyy-MM-dd 00:00:00") + "' and start_time <= '" + myStringInterval + "') "; 
+        $('#timetime').text(myString);
+        // DATE MAGICS - ends here
+
+          // REGIONS 
+          // severozapad: 'region_id = 1',
+          // ural: 'region_id = 2',
+          // sibir: 'region_id = 3',
+          // dalnvostok: 'region_id = 4',
+          // center: 'region_id = 5',
+          // stolica: 'region_id = 6',
+          // povolzhe: 'region_id = 7',
+          // kavkaz: 'region_id = 8',
+          // unknown: 'region_id = 9',
+
+        if ( magic_point == 'ini' ) { 
+          select_formula="select " + date_marker + select_formula + select_traffic + select_type + date_interval + " group by " + date_marker + " FORMAT JSON";
+          select_formula_2="select sum(ceil(duration/60)) as summa from default.merged_data where duration >= 3 " + select_traffic + select_type + date_interval;" FORMAT JSON";
+          // select_formula_3="select sum(ceil(duration/60)) as summa from default.merged_data where duration >= 3 " + select_traffic + select_type + date_interval;" FORMAT JSON";
+          console.log(select_formula);
+          console.log(select_formula_2);          
+        }
+
+        if ( magic_point == 'inn' ) {
+//          select_formula_01="select " + date_marker + ", sum(ceil(duration/60)) as summm from default.merged_data where duration >= 3 and rec_type = 1" + select_traffic + select_type + date_interval + " group by " + date_marker + " FORMAT JSON";
+//          select_formula_02="select " + date_marker + ", sum(ceil(duration/60)) as summm from default.merged_data where duration >= 3 and rec_type = 2" + select_traffic + select_type + date_interval + " group by " + date_marker + " FORMAT JSON";
+          select_formula_01="select toDayOfMonth(event_date) AS date_marker, sum(a_plus_value) as a_plus_value from default.merged_data WHERE obj_name == 'ЗАО \"Светлана-Рентген\"' GROUP BY toDayOfMonth(event_date) ";
+          select_formula_02="select toDayOfMonth(event_date) AS date_marker, sum(a_plus_value) as a_plus_value from default.merged_data WHERE obj_name == 'ЗАО \"Светлана-Рентген\"' GROUP BY toDayOfMonth(event_date) ";
+          console.log(select_formula_01);
+          console.log(select_formula_02);          
+        }
+
+
+        $('#chart1').remove(); // this is my <canvas> element
+        $('#chartc').append('<img id="chart1" width="400px;" src=da_files/spinner.gif>');
+        // $('#animationProgress').show();
+
+                      
+        if ( magic_point == 'ini' ) { 
+
+           	console.log('magic_point - ini');
+
+
+            $.ajax({
+              url: 'http://192.168.1.78:8123/?add_http_cors_header=1&log_queries=1&database=default&max_result_rows=500&result_overflow_mode=throw',
+              type: 'post',  
+              data: select_formula,            
+              success: function (rawData) {
+
+                var locallabels = [];
+
+                $('#chart1').remove(); // this is loading spinner
+                $('#chartc').append('<canvas class="chart1" id="chart1" ></canvas>');      
+                var dataForChart = rawData.data.map(function(fields) {   
+
+                  if ( date_point == "year" ) {
+                      locallabels.push(labels[fields[date_marker]-1]);
+                  }
+                  // console.log('filed marker:'+fields[date_marker]);
+
+   
+                  return {
+                    y: fields['minutes']
+                  }
+                })
+                var dataForChart2 = rawData.data.map(function(fields) {                 
+                  return {
+                    y: fields['minuu']
+                  }
+                })                
+                
+                if ( date_point == "year" ) { labels = locallabels; }
+                
+                var ctx = $('.chart1').get(0).getContext("2d");            
+                var progress = document.getElementById('animationProgress');        
+
+                var cfg = {
+                  type: 'bar',
+                  data: {         
+                    labels: labels,
+                    datasets: [{
+                      label: "Оплаченные минуты",
+                      data: dataForChart,
+                      type: gtype, 
+                      pointRadius: 5,
+                      radius: 5,
+                      backgroundColor: color1,
+                      borderColor: color1,           
+                      hoverRadius: 6,           
+                      fill: false,
+                      lineTension: 0,
+                      borderWidth: 2
+                    },{
+                      label: "Полные минуты разговора",
+                      data: dataForChart2,
+                      type: gtype, 
+                      backgroundColor: color2,
+                      borderColor: color2,
+                      pointRadius: 5,
+                      radius: 5,
+                      hoverRadius: 6,           
+                      fill: false,
+                      lineTension: 0,
+                      borderWidth: 2
+                    }]
+                  },
+                  options: {
+                    legend: { display: true }, //false?true
+                    scales: {
+                      xAxes: [{
+                        scaleLabel: {
+                          display: true,
+                          labelString: 'Время'
+                        }
+                      }],
+                      yAxes: [{
+                        ticks: {
+                            callback: function(label, index, labels) {
+                                // return label/1000+'k';
+                                return respace(label+' 00');
+                            }
+                        },                          
+                        scaleLabel: {
+                        display: true,
+                        labelString: 'Минуты'
+                        }
+                      }
+                      ]
+                    },
+                    animation: {
+                        duration: aduration,
+                        onProgress: function(animation) {
+                            progress.value = animation.currentStep / animation.numSteps;
+                        },
+                        onComplete: function(animation) {
+                            window.setTimeout(function() {
+                                progress.value = 0;
+                            }, aduration);
+                        }
+                    },
+                    tooltips: {
+                            callbacks: {
+                                label: function(tooltipItem, data) {
+                                    return data.datasets[tooltipItem.datasetIndex].label+': '+respace(tooltipItem.yLabel);
+                                }
+                            }
+                        }
+                  }
+                };
+
+                chart = new Chart(ctx, cfg);
+                $('#timeblock').show();
+                $('#switcher').show();
+                $('#animationProgress').hide();
+
+
+                if ( date_point == "week" ) {  
+                  // chart.config.options.scales.xAxes.labelString = "Дни недели";
+                }
+
+              }
+            });       
+
+            // Chart.update();
+
+            $.ajax({
+              url: 'http://staging.saymon.info:5123/?add_http_cors_header=1&log_queries=1&database=default&max_result_rows=500&result_overflow_mode=throw',
+              type: 'post',  
+              data: select_formula_2,            
+              success: function (rawData) {
+                rawData += "00"
+                rawData = rawData.replace(new RegExp("^(\\d{" + (rawData.length%3?rawData.length%3:0) + "})(\\d{3})", "g"), "$1 $2").replace(/(\d{3})+?/gi, "$1 ").trim();
+                rawData = rawData.replace(/00$/,'');
+                $('#summa').text(rawData+' оплаченных минут суммарно');
+              }
+            });       
+
+           }
+           if ( magic_point == 'inn' ) {
+
+           	console.log('magic_point - inn');
+
+
+            $.ajax({
+              url: 'http://staging.saymon.info:5123/?add_http_cors_header=1&log_queries=1&database=default&max_result_rows=500&result_overflow_mode=throw',
+              type: 'post',  
+              data: select_formula_01,            
+              success: function (rawData) {
+
+                var localsumm = 0;
+                var locallabels = [];
+                var localvalues = [];
+
+                $('#chart1').remove(); // this is loading spinner
+                $('#chartc').append('<canvas class="chart1" id="chart1" ></canvas>');      
+                var dataForChart = rawData.data.map(function(fields) {   
+    
+                  if ( date_point == "year" ) {
+                      locallabels.push(labels[fields[date_marker]-1]);
+                  }
+                  // console.log('filed marker:'+fields[date_marker]);
+
+                  fields['summm'] = getRandomInt(fields['summm']); /// THIS THE DEMO THING
+                  localsumm += fields['summm'];
+                  localvalues.push(fields['summm']);
+
+                  return {
+                    y: fields['summm']
+                  }
+                })
+                console.log('labels length:'+labels.length);
+                
+                if ( date_point == "year" ) { labels = locallabels; }
+                console.log('labels length:'+labels.length);
+
+                var ctx = $('.chart1').get(0).getContext("2d");    
+                var progress = document.getElementById('animationProgress');        
+
+                var cfg = {
+                  type: 'bar',
+                  data: {         
+                    labels: labels,
+                    datasets: [{
+                      label: "MyVoIPNet to Public (paid minutes)",
+                      data: dataForChart,
+                      type: gtype, 
+                      pointRadius: 5,
+                      radius: 5,
+                      backgroundColor: color1,
+                      borderColor: color1,           
+                      hoverRadius: 6,           
+                      fill: false,
+                      lineTension: 0,
+                      borderWidth: 2
+                    }]
+                  },
+                  options: {
+                    legend: { display: true }, //false?true
+                    scales: {
+                      xAxes: [{
+                        scaleLabel: {
+                          display: true,
+                          labelString: 'Time'
+                        }
+                      }],
+                      yAxes: [{
+                        ticks: {
+                            callback: function(label, index, labels) {
+                                // return label/1000+'k';
+                                return respace(label+' 00');
+                            }
+                        },                        
+                        scaleLabel: {
+                        display: true,
+                        labelString: 'Minutes'
+                        }
+                      }
+                      ]
+                    },
+                    animation: {
+                        duration: aduration,
+                        onProgress: function(animation) {
+                            progress.value = animation.currentStep / animation.numSteps;
+                        },
+                        onComplete: function(animation) {
+                            window.setTimeout(function() {
+                                progress.value = 0;
+                            }, aduration);
+                        }
+                    },
+                    tooltips: {
+                            callbacks: {
+                                label: function(tooltipItem, data) {
+                                    return data.datasets[tooltipItem.datasetIndex].label+': '+respace(tooltipItem.yLabel+' 00');
+                                }
+                            }
+                        }
+                  }
+                };
+
+                chart = new Chart(ctx, cfg);
+
+                var locatitle = chart.data.datasets[0].label;
+                //+', '+traffic_point.replace(/whole/,'все типы'); 
+                var localavg = respace(Math.floor(localsumm / labels.length)+' 00'); 
+                $('#totalminutes').text(localsumm);
+                localsumm = respace(localsumm+' 00');
+                var localperiod = $('#timetime').text().replace(/\(00:00\)/g,'') + ', ' + traffic_point;
+                localperiod = localperiod.replace(/whole/,'все типы трафика'); 
+                localperiod = localperiod.replace(/stmb/,'trunc - пучки направлений'); 
+                localperiod += '</br>'+ $('#direction_legend').text();
+
+                var localmin = respace(Math.min.apply(null, localvalues)+' 00');
+                var localmax = respace(Math.max.apply(null, localvalues)+' 00');
+
+                var localsummstring = "за ";
+                var localperiodstring = "за ";
+                switch (date_point) {
+                  case 'day': 
+                    localsummstring = localsummstring + 'день';
+                    localperiodstring = localperiodstring + 'час';
+                    break;
+                  case 'week': 
+                    localsummstring = localsummstring + 'неделю';
+                    localperiodstring = localperiodstring + 'день';                    
+                    break;                  
+                  case 'month': 
+                    localsummstring = localsummstring + 'месяц';
+                    localperiodstring = localperiodstring + 'день';
+                    break;                  
+                  case 'year':
+                    localsummstring = localsummstring + 'год';
+                    localperiodstring = localperiodstring + 'месяц';
+                    break;                  
+                }
+
+
+                $('#summa').html(
+                  '<p>'+localperiod + '</p>'+
+                  '<h3>'+ locatitle + '</h3>' +
+                  '<table style="width:100%;">' +
+                  '<tr><td>Сумма '+localsummstring+':</td><td style="text-align:right;">' +localsumm + '</td></tr>' +
+                  '<tr><td>Минимально '+localperiodstring+':</td><td style="text-align:right;">' + localmin + '</td></tr>' +
+                  '<tr><td>Максимально '+localperiodstring+':</td><td style="text-align:right;">' + localmax + '</td></tr>' +
+                  '<tr><td>Среднее '+localperiodstring+':</td><td style="text-align:right;">' + localavg + '</td></tr>' + 
+                  '</table>'
+                  );
+                funcy();
+              }
+            });    
+
+
+           }
+         }       // end of loadgraph()   
+
+
+
+         function funcy() {
+
+           var localsumm = 0;
+                var localvalues = [];
+
+           $.ajax({
+              url: 'http://192.168.1.78:8123/?add_http_cors_header=1&log_queries=1&database=default&max_result_rows=500&result_overflow_mode=throw',
+              type: 'post',  
+              data: select_formula_02,            
+              success: function (rawData) {
+                var dataForChart_02 = rawData.data.map(function(fields) {   
+                  fields['summm'] = getRandomInt(fields['summm']); /// THIS THE DEMO THING
+                  localsumm += fields['summm'];
+                  localvalues.push(fields['summm']);
+                  return {
+                    y: fields['summm']
+                  }
+                })
+                var cfg = {
+                      label: "Public to MyVoIPNet (paid minutes)",
+                      data: dataForChart_02,
+                      type: gtype, 
+                      pointRadius: 5,
+                      radius: 5,
+                      backgroundColor: color2,
+                      borderColor: color2,           
+                      hoverRadius: 6,           
+                      fill: false,
+                      lineTension: 0,
+                      borderWidth: 2
+                };
+
+                chart.data.datasets.push(cfg);
+                chart.update();
+
+                var localavg = respace(Math.floor(localsumm / labels.length)+' 00'); 
+                var localtotalminutes = respace(parseInt($('#totalminutes').text()) + localsumm);
+                localsumm = respace(localsumm+' 00');
+                var locatitle = chart.data.datasets[1].label; 
+
+                var localmin = respace(Math.min.apply(null, localvalues)+' 00');
+                var localmax = respace(Math.max.apply(null, localvalues)+' 00');
+
+                var localsummstring = "за ";
+                var localperiodstring = "за ";
+                switch (date_point) {
+                  case 'day': 
+                    localsummstring = localsummstring + 'день';
+                    localperiodstring = localperiodstring + 'час';
+                    break;
+                  case 'week': 
+                    localsummstring = localsummstring + 'неделю';
+                    localperiodstring = localperiodstring + 'день';                    
+                    break;                  
+                  case 'month': 
+                    localsummstring = localsummstring + 'месяц';
+                    localperiodstring = localperiodstring + 'день';
+                    break;                  
+                  case 'year':
+                    localsummstring = localsummstring + 'год';
+                    localperiodstring = localperiodstring + 'месяц';
+                    break;                  
+                }
+
+                $('#summa').html(
+                  $('#summa').html()+' </br>' +
+                  '<h3>'+ locatitle + '</h3>' +
+                  '<table style="width:100%;">' +
+                  '<tr><td>Сумма '+localsummstring+':</td><td style="text-align:right;">' +localsumm + '</td></tr>' +
+                  '<tr><td>Минимально '+localperiodstring+':</td><td style="text-align:right;">' + localmin + '</td></tr>' +
+                  '<tr><td>Максимально '+localperiodstring+':</td><td style="text-align:right;">' + localmax + '</td></tr>' +
+                  '<tr><td>Среднее '+localperiodstring+':</td><td style="text-align:right;">' + localavg + '</td></tr>' + 
+                  '</table>' + 
+                  '</br><h3>Вместе </h3>' +
+                  '<table style="width:100%;">' +
+                  '<tr><td>Сумма '+localsummstring+':</td><td style="text-align:right;">'+localtotalminutes + '</td></tr>' +
+                  '</table>' 
+                  );                
+                $('#timeblock').show();
+                $('#switcher').show();
+                $('#animationProgress').hide();
+
+              }
+            });    
+}
+
+         //
+         // TODO
+         // Sort data before ouput 
+         // Promo material creation 
+         // Time-picker and gouping by 
+         // Emotion iOS/Android split
+         // Emotion iOS/Android versions split
+         // Sub chearts / widgets for regions
+         // ACD/ASR
+         // Trend in digital widget
+         // re-Design
+         // Refactoring by a professional
+         // Show Max on graph
+         // Show Avg on graph
+         // Check if correct
+         // Tune size
+         // Source from SAYMON API 
+         // Source from Vertica
+         // Source from PostgreSQL
+         // Source from MySQL
+         // Source from Oracle
+         // Source from MSSQL
+         // Online Table
+         // Technical metrics dashboard (Tapri specific)
+         // Authentification (LDAP, OAUTH)
+         // Click to scale up a widget (sub chart)
+         // Avarage chooser (group by period)
+         // Dropdown select of prameters to show like https://news.yandex.ru/quotes/region/20002.html
+         // Select multi parameter to show 
+         // Better labels on asixs
+         // Plan stand-alone SW product or/and SAYMON plugin
+         // Cross-browser support test
+         // iPad optimisation
+         // Wide screen optimisation
+         //
+         // HISTORY
+         // Понять что к чему - 1 year
+         // Подготовка ETL и сбор данных 1 год
+         // Ожидание готовности внешних компонент 1 год
+         // Первая юзабельная версия 16 часов
+         // Total minutes
+         // Switch type of graph
+         // Change style
+         // Multi-parameter graphic
+         // Show table
+         // Multi-parameter  table
+         // Pie chart
+         //
+         //
+  </script>
+
+  <script type="text/javascript">
+    function switchtype(type) {
+        $('#downloadbutton').hide("slow");
+        $('#tframe').hide("slow");
+        $('#pframe').hide("slow");
+        $('#iframe').show("slow");
+        $('#summa').show("slow");
+        $('#spock').show("slow");
+
+
+      gtype = type;
+      chart.config.data.datasets[0].type = type;
+      chart.config.data.datasets[1].type = type;
+      chart.update();
+    }
+  </script> 
+
+  <!-- ////////////////////////////// -->
+  <script type="text/javascript">
+        function downloadCSV(csv, filename) {
+            var csvFile;
+            var downloadLink;
+
+            // CSV file
+            csvFile = new Blob([csv], {data: "text/csv;charset=utf-8;"});
+            // csvFile = new Blob([csv], {data: "text/csv;charset=utf-8,%EF%BB%BF"});
+            // csvFile = new Blob([csv], {type: "text/csv;charset=utf-8,%EF%BB%BF,"});
+            // csvFile = new Blob([csv], {type: "text/csv;charset=utf-8"});
+            // csvFile = new Blob([csv], {data: "text/csv;charset=utf-8"});
+            // csvFile = new Blob([csv], {type: "data:text/csv;charset=utf-8"});
+            // csvFile = new Blob([csv], {type: "data:text/csv;charset=utf-8,%EF%BB%BF,"});
+
+            // Download link
+            downloadLink = document.createElement("a");
+
+            // File name
+            downloadLink.download = filename;
+
+            // Create a link to the file
+            downloadLink.href = window.URL.createObjectURL(csvFile);
+            // downloadLink.setAttribute("href","data:text/csv;charset=utf-8,%EF%BB%BF");
+
+            // Hide download link
+            downloadLink.style.display = "none";
+
+            // Add the link to DOM
+            document.body.appendChild(downloadLink);
+
+            // Click download link
+            downloadLink.click();
+        }
+        function exportTableToCSV(filename) {
+            var csv = [];
+            var rows = document.querySelectorAll("table tr");
+            
+            for (var i = 0; i < rows.length; i++) {
+                var row = [], cols = rows[i].querySelectorAll("td, th");
+                
+                for (var j = 0; j < cols.length; j++) 
+                    row.push(cols[j].innerText);
+                    // row.push(encodeURIComponent(cols[j].innerText));
+                
+                csv.push(row.join(";"));        
+            }
+
+            //https://stackoverflow.com/questions/19492846/javascript-to-csv-export-encoding-issue
+
+            // Download CSV file
+            // downloadCSV('data:text/csv;charset=utf-8,%EF%BB%BF'+encodeURIComponent(csv.join("\n")), filename);
+            // downloadCSV('data:text/csv;charset=utf-8,%EF%BB%BF'+csv.join("\n"), filename);
+            downloadCSV(csv.join("\n"), filename);
+        }
+
+  </script>
+
+  <!-- ////////////////////////////// -->
+
+</body></html>
